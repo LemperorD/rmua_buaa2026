@@ -92,7 +92,7 @@ ld@D:~/IntelligentUAVChampionshipSimulator$ tree -L 2
 
 3/4月TODOLIST如下：
 
-- [] 写一个cpp维护机体系下的tf变换，详细参数参见比赛规则与DJI``basic_dev``中的代码
-- [] 感知：fastlio/omni-vins
-- [] 规划：前端ego-planner,后端minco/b-spline
-- [] 控制：接入PX4,尝试SE3/MPC
+- [ ] 写一个cpp维护机体系下的tf变换，详细参数参见比赛规则与DJI``basic_dev``中的代码
+- [ ] 感知：fastlio/omni-vins
+- [ ] 规划：前端ego-planner,后端minco/b-spline
+- [ ] 控制：接入PX4,尝试SE3/MPC

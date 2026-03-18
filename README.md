@@ -1,120 +1,98 @@
-# __自主无人机竞速基本开发教程__
-## 1. 启动模拟器 
-参考 ***https://github.com/RoboMaster/IntelligentUAVChampionshipSimulator/tree/RMUA2026-01*** 配置好模拟器并启动
+# 北航Transistor战队rmua2026
 
-## 2. 安装Nvidia-Docker
->确保已安装了 Nvidia 驱动
-----
->安装docker
->+ `sudo apt-get install ca-certificates gnupg lsb-release`
->+ `sudo mkdir -p /etc/apt/keyrings`
->+ `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`
->+ `echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`
->+ `sudo apt-get update`
->+ `sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin`
-----
->安装nvidia-container-toolkit
->+ `distribution=$(. /etc/os-release;echo $ID$VERSION_ID)`
->+ `curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -`
->+ `curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list`
->+ `sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit`
->+ `sudo systemctl restart docker`
----
->设置用户组，消除 *sudo* 限制  
->+ `sudo groupadd docker`  
->+ `sudo gpasswd -a $USER docker`  
->+ 注销账户并重新登录使新的用户组生效
->+ sudo service docker restart
+<div style="text-align: center;">
+  <img src="docs/img/transistor_code.png" width="400" height="400">
+</div>
 
-## 3. 安装ROS-Noetic 
->+ `sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'`   
->+ `sudo apt install curl `  
->+ `curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -`   
->+ `sudo apt update`
->+ `sudo apt install ros-noetic-desktop-full`
->+ `sudo apt install python3-catkin-tools`
+本仓库用来协作开发rmua2026的无人机自主导航仿真项目
 
-## 4. 基于docker镜像的控制程序开发流程
-本次比赛中的模拟器使用 ***ROS*** 进行通讯，选手需要编写含有控制程序的ros功能包操控无人机完成目标,该ros功能包需要封装在docker镜像中进行提交。建议先在主机下开发完相应程序后在进行程序的docker封装，流程如下
->进入文件目录  
-`cd /path/to/IntelligentUAVChampionshipBase/basic_dev`  
->开发案例完成功能设计与程序开发并根据需要修改 _Dockerfile_ 后，构建镜像   
-`docker build -t basic_dev .`      
->导出镜像  
-`docker image save [镜像：TAG] > test.tar`    
-在主机工作目录下会出现 test.tar 文件，该文件即为可提交镜像  
-### 注意:  
-1. 服务器会在外部随机分配ip给容器，不能在镜像中的启动文件中提供 *ROS_IP* 和 *ROS_MASTER_URI* 这两个环境变量，否则服务器与容器将无法连接     
-2. 镜像中的程序应在镜像启动后自动开启    
-3. 镜像程序不允许使用GUI(X11等)功能        
+# 0. 环境
 
+- Ubuntu20.04
+- ros noetic
 
-## 5. 程序案例
-### 基础开发环境(basic_dev)
-#### 简介
-该镜像包含有ros-noetic-desktop-focal以及相关的必要ros组件。程序中展示了如何模拟器进行数据交互
-#### 使用说明
->进入文件目录    
-`cd /path/to/IntelligentUAVChampionshipBase/basic_dev`  
->构建镜像   
-`docker build -t basic_dev .`  
->启动docker镜像   
-`./run_basic_dev.sh`  
->当看到如下图，说明容器启动成功，程序可接受到模拟器传出的数据
-![pic](./docs/1.png)
+# 1. 仿真环境安装与仓库克隆流程
 
-## ros数据交互  
->用于获取数据的可订阅的主题  
->+ 前视相机   
-`/airsim_node/drone_1/front_left/Scene`  
-`/airsim_node/drone_1/front_right/Scene`
->+ 后视相机  
-`/airsim_node/drone_1/back_left/Scene`  
-`/airsim_node/drone_1/back_right/Scene`  
->+ imu数据  
-`/airsim_node/drone_1/imu/imu`
->+ 雷达数据  
-`/airsim_node/drone_1/lidar`
->+ 无人机状态真值  
-`/airsim_node/drone_1/debug/pose_gt`  
->+ gps数据(含带误差姿态)  
-`/airsim_node/drone_1/gps`  
->+ 电机输入PWM信号(0:右前, 1:左后, 2:左前, 3:右后)  
-`/airsim_node/drone_1/debug/rotor_pwm`  
->+ 起始位姿  
-`/airsim_node/initial_pose`  
->+ 终点位置  
-`/airsim_node/end_goal`  
----- 
->用于发送指令的主题
->+ 速度控制(该主题通信需自行开发，开发所需文件可查阅模拟器中的VelCmdmsg文件夹)  
-`/airsim_node/drone_1/vel_cmd_body_frame`
->+ PWM控制(0:右前, 1:左后, 2:左前, 3:右后)  
-`/airsim_node/drone_1/rotor_pwm_cmd`
-----
->可用服务   
->+ 起飞   
-`/airsim_node/drone_1/takeoff`   
->+ 降落   
-`/airsim_node/drone_1/land`   
->+ 重置   
-`/airsim_node/reset` 
-### 注意:   
-1. 服务器仅开放规则手册中提及的话题,其余话题仅供调试程序使用。
-2. 案例中不包含速度控制ros通信，需要自行开发，开发所需文件可查阅模拟器中的VelCmdmsg文件夹
+只介绍本机启动方式，docker启动方式详见原仓库[](https://github.com/RoboMaster/IntelligentUAVChampionshipSimulator.git)
 
-## 系统相关参数
-> 无人机系统参数  
->+ 质量 0.9kg    
->+ 轴距（电机至机体中心）0.18米  
->+ 转动惯量 Ixx 0.0046890742, Iyy 0.0069312, Izz 0.010421166  
->+ 电机升力系数 0.000367717  
->+ 电机反扭力系数 4.888486266072161e-06  
->+ 最大转速 11079.03 转每分钟  
-----
-> 标定板参数
->+ 行数（内点）8  
->+ 列数（内点）11  
->+ 方块边长 0.06 米  
+## 1.1 仿真环境安装
 
+先克隆官方的仿真环境仓库
 
+```bash
+git clone https://github.com/RoboMaster/IntelligentUAVChampionshipSimulator.git
+```
+
+然后将仿真环境核心载入
+
+```bash
+cd /path/to/IntelligentUAVChampionshipSimulator
+```
+
+```bash
+wget https://sz-rm-rmua-dispatch-prod.oss-cn-shenzhen.aliyuncs.com/4035443c915085ab1bd01d383fe84fbe/simulator_12.0.0.3.zip
+unzip simulator_12.0.0.3.zip
+```
+
+然后将解压后的文件夹放在``/path/to/IntelligentUAVChampionshipSimulator``下
+
+```bash
+cd /path/to/IntelligentUAVChampionshipSimulator/simulator_12.0.0.3
+```
+
+```bash
+mv Build/ ../..
+```
+
+## 1.2 克隆开发代码库
+
+```bash
+git clone https://github.com/LemperorD/rmua_buaa2026.git
+```
+
+最终整体文件架构如下：
+```bash
+ld@D:~/IntelligentUAVChampionshipSimulator$ tree -L 2
+.
+├── Build
+│   └── LinuxNoEditor
+├── Dockerfile
+├── docs
+│   ├── 5.png
+│   ├── 关闭相机.png
+│   ├── 渲染模式.png
+│   ├── no_data_type.png
+│   └── topic2.png
+├── LICENSE
+├── README.md
+├── rmua_buaa2026
+│   ├── basic_dev
+│   ├── docs
+│   ├── LICENSE
+│   ├── README.md
+│   └── README_old.md
+├── run_docker_simulator.sh
+├── run_simulator_offscreen.sh
+├── run_simulator.sh
+├── settings.json
+├── start.bash
+└── VelCmdmsg
+    └── VelCmd.msg
+```
+
+# 2. 协作规范
+
+- fork本仓库，或者创建feature分支，将分支命名为``feature_<feature_name>``
+- 开发过程中留好commit记录，且尽量不更改别的开发功能
+- 开发好之后提交PR(Pull Request)
+
+流程中包含的git命令请自行询问大语言模型
+
+# 3. TODOLIST
+
+3/4月TODOLIST如下：
+
+- [] 写一个cpp维护机体系下的tf变换，详细参数参见比赛规则与DJI``basic_dev``中的代码
+- [] 感知：fastlio/omni-vins
+- [] 规划：前端ego-planner,后端minco/b-spline
+- [] 控制：接入PX4,尝试SE3/MPC

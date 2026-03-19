@@ -31,7 +31,7 @@ pcl_conversions
 pcl_ros
 )
 
-find_package(OpenCV 4.10.0 EXACT)
+find_package(OpenCV 4 REQUIRED)
 find_package(g2o REQUIRED)
 
 catkin_package(

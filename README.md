@@ -30,18 +30,18 @@ cd /path/to/IntelligentUAVChampionshipSimulator
 ```
 
 ```bash
-wget https://sz-rm-rmua-dispatch-prod.oss-cn-shenzhen.aliyuncs.com/4035443c915085ab1bd01d383fe84fbe/simulator_12.0.0.3.zip
+wget https://sz-rm-rmua-dispatch-prod.oss-cn-shenzhen.aliyuncs.com/0241dbf7855f3560410e16fbeb68fcba/simulator_12.0.0.4.zip
 unzip simulator_12.0.0.3.zip
 ```
 
 然后将解压后的文件夹放在``/path/to/IntelligentUAVChampionshipSimulator``下
 
 ```bash
-cd /path/to/IntelligentUAVChampionshipSimulator/simulator_12.0.0.3
+cd /path/to/IntelligentUAVChampionshipSimulator/simulator_12.0.0.4
 ```
 
 ```bash
-mv Build/ ../..
+mv Build/ ../
 ```
 
 ## 1.2 克隆开发代码库
@@ -51,6 +51,7 @@ git clone https://github.com/LemperorD/rmua_buaa2026.git
 ```
 
 最终整体文件架构如下：
+
 ```bash
 ld@D:~/IntelligentUAVChampionshipSimulator$ tree -L 2
 .

@@ -30,8 +30,8 @@ cd /path/to/IntelligentUAVChampionshipSimulator
 ```
 
 ```bash
-wget https://sz-rm-rmua-dispatch-prod.oss-cn-shenzhen.aliyuncs.com/0241dbf7855f3560410e16fbeb68fcba/simulator_12.0.0.4.zip
-unzip simulator_12.0.0.3.zip
+wget https://sz-rm-rmua-dispatch-prod.oss-cn-shenzhen.aliyuncs.com/b39a0194e982f0d987153c6016feb325/simulator_12.0.0.5.zip
+unzip simulator_12.0.0.5.zip
 ```
 
 然后将解压后的文件夹放在``/path/to/IntelligentUAVChampionshipSimulator``下

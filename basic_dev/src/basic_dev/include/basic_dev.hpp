@@ -39,7 +39,7 @@ private:
     airsim_ros::Land land;
     airsim_ros::Reset reset;
 
-    // 使用publisher发布速度指令需要定义 Velcmd , 并赋予相应的值后，将他publish（）出去
+    // 使用publisher发布速度指令需要定义 Velcmd , 并赋予相应的值后，将他publish()出去
     airsim_ros::VelCmd velcmd;
 
     //无人机信息通过如下命令订阅，当收到消息时自动回调对应的函数
@@ -57,6 +57,9 @@ private:
 
     //通过publisher实现对无人机的速度控制
     ros::Publisher vel_publisher;
+
+    // 发布北西天坐标系下的雷达点云
+    ros::Publisher lidar_nwu_publisher;
 
     void pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void gps_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);

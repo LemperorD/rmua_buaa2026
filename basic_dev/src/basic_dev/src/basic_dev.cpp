@@ -32,7 +32,7 @@ BasicDev::BasicDev(ros::NodeHandle *nh)
     odom_suber = nh->subscribe<geometry_msgs::PoseStamped>("/airsim_node/drone_1/debug/pose_gt", 1, std::bind(&BasicDev::pose_cb, this, std::placeholders::_1));//状态真值，用于赛道一
     gps_suber = nh->subscribe<geometry_msgs::PoseStamped>("/airsim_node/drone_1/gps", 1, std::bind(&BasicDev::gps_cb, this, std::placeholders::_1));//状态真值，用于赛道一
     // imu_suber = nh->subscribe<sensor_msgs::Imu>("airsim_node/drone_1/imu/imu", 1, std::bind(&BasicDev::imu_cb, this, std::placeholders::_1));//imu数据
-    // lidar_suber = nh->subscribe<sensor_msgs::PointCloud2>("airsim_node/drone_1/lidar", 1, std::bind(&BasicDev::lidar_cb, this, std::placeholders::_1));//imu数据
+    lidar_suber = nh->subscribe<sensor_msgs::PointCloud2>("airsim_node/drone_1/lidar", 1, std::bind(&BasicDev::lidar_cb, this, std::placeholders::_1));//imu数据
     // front_left_view_suber = it->subscribe("airsim_node/drone_1/front_left/Scene", 1, std::bind(&BasicDev::front_left_view_cb, this,  std::placeholders::_1));
     // front_right_view_suber = it->subscribe("airsim_node/drone_1/front_right/Scene", 1, std::bind(&BasicDev::front_right_view_cb, this,  std::placeholders::_1));
     //通过这两个服务可以调用模拟器中的无人机起飞和降落命令
@@ -41,6 +41,8 @@ BasicDev::BasicDev(ros::NodeHandle *nh)
     reset_client = nh->serviceClient<airsim_ros::Reset>("/airsim_node/reset");
     //通过publisher实现对无人机的速度控制和姿态控制和角速度控制
     vel_publisher = nh->advertise<airsim_ros::VelCmd>("airsim_node/drone_1/vel_cmd_body_frame", 1);
+
+    lidar_nwu_publisher = nh->advertise<sensor_msgs::PointCloud2>("airsim_node/drone_1/lidar_nwu", 1);
 
     // takeoff_client.call(takeoff); //起飞
     // land_client.call(land); //降落
@@ -94,9 +96,21 @@ void BasicDev::front_right_view_cb(const sensor_msgs::ImageConstPtr& msg)
 
 void BasicDev::lidar_cb(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
+    // 订阅NED坐标系下雷达点晕并将其转换到NWU坐标系下
     pcl::PointCloud<pcl::PointXYZ>::Ptr pts(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *pts);
-    ROS_INFO("Get lidar data. time: %f, size: %ld", msg->header.stamp.sec + msg->header.stamp.nsec*1e-9, pts->size());
+    // ROS_INFO("Get lidar data. time: %f, size: %ld", msg->header.stamp.sec + msg->header.stamp.nsec*1e-9, pts->size());
+    for (auto& p : pts->points) {
+        p.y = -p.y;
+        p.z = -p.z;
+    }
+    sensor_msgs::PointCloud2 msg_nwu;
+    pcl::toROSMsg(*pts, msg_nwu);
+
+    msg_nwu.header = msg->header;
+    msg_nwu.header.frame_id = "lidar_nwu";
+
+    lidar_nwu_publisher.publish(msg_nwu);
 }
 
 #endif

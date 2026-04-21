@@ -1,0 +1,5 @@
+uav_simulator/Utils/waypoint_generator
+/home/ld/ego-planner/devel/.private/waypoint_generator/share/waypoint_generator/cmake/waypoint_generatorConfig-version.cmake /home/ld/ego-planner/devel/share/waypoint_generator/cmake/waypoint_generatorConfig-version.cmake
+/home/ld/ego-planner/devel/.private/waypoint_generator/share/waypoint_generator/cmake/waypoint_generatorConfig.cmake /home/ld/ego-planner/devel/share/waypoint_generator/cmake/waypoint_generatorConfig.cmake
+/home/ld/ego-planner/devel/.private/waypoint_generator/lib/pkgconfig/waypoint_generator.pc /home/ld/ego-planner/devel/lib/pkgconfig/waypoint_generator.pc
+/home/ld/ego-planner/devel/.private/waypoint_generator/lib/waypoint_generator/waypoint_generator /home/ld/ego-planner/devel/lib/waypoint_generator/waypoint_generator

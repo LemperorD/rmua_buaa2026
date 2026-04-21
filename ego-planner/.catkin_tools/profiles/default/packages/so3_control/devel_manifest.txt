@@ -1,0 +1,7 @@
+uav_simulator/so3_control
+/home/ld/ego-planner/devel/.private/so3_control/share/so3_control/cmake/so3_controlConfig.cmake /home/ld/ego-planner/devel/share/so3_control/cmake/so3_controlConfig.cmake
+/home/ld/ego-planner/devel/.private/so3_control/share/so3_control/cmake/so3_controlConfig-version.cmake /home/ld/ego-planner/devel/share/so3_control/cmake/so3_controlConfig-version.cmake
+/home/ld/ego-planner/devel/.private/so3_control/lib/libso3_control_nodelet.so /home/ld/ego-planner/devel/lib/libso3_control_nodelet.so
+/home/ld/ego-planner/devel/.private/so3_control/lib/libSO3Control.so /home/ld/ego-planner/devel/lib/libSO3Control.so
+/home/ld/ego-planner/devel/.private/so3_control/lib/so3_control/control_example /home/ld/ego-planner/devel/lib/so3_control/control_example
+/home/ld/ego-planner/devel/.private/so3_control/lib/pkgconfig/so3_control.pc /home/ld/ego-planner/devel/lib/pkgconfig/so3_control.pc

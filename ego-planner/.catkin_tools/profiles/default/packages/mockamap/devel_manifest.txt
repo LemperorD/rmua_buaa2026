@@ -1,0 +1,5 @@
+uav_simulator/mockamap
+/home/ld/ego-planner/devel/.private/mockamap/share/mockamap/cmake/mockamapConfig.cmake /home/ld/ego-planner/devel/share/mockamap/cmake/mockamapConfig.cmake
+/home/ld/ego-planner/devel/.private/mockamap/share/mockamap/cmake/mockamapConfig-version.cmake /home/ld/ego-planner/devel/share/mockamap/cmake/mockamapConfig-version.cmake
+/home/ld/ego-planner/devel/.private/mockamap/lib/pkgconfig/mockamap.pc /home/ld/ego-planner/devel/lib/pkgconfig/mockamap.pc
+/home/ld/ego-planner/devel/.private/mockamap/lib/mockamap/mockamap_node /home/ld/ego-planner/devel/lib/mockamap/mockamap_node

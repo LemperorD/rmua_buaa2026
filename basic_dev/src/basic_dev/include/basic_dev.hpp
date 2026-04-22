@@ -22,6 +22,10 @@
 #include <boost/thread/thread.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <pcl_conversions/pcl_conversions.h>
+
+#include <tf2_ros/static_transform_broadcaster.h>
+
+#include <cmath>
 #endif
 
 class BasicDev
@@ -61,6 +65,10 @@ private:
     // 发布北西天坐标系下的雷达点云
     ros::Publisher lidar_nwu_publisher;
 
+    // 发布静态tf
+    ros::Timer static_tf_timer;
+    tf2_ros::StaticTransformBroadcaster static_broadcaster_;
+
     void pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void gps_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void imu_cb(const sensor_msgs::Imu::ConstPtr& msg);
@@ -69,6 +77,7 @@ private:
     void front_left_view_cb(const sensor_msgs::ImageConstPtr& msg);
     void front_right_view_cb(const sensor_msgs::ImageConstPtr& msg);
 
+    void static_tf_broadcast();
 
 public:
     BasicDev(ros::NodeHandle *nh);

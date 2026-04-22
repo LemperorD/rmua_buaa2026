@@ -32,7 +32,7 @@ BasicDev::BasicDev(ros::NodeHandle *nh)
     odom_suber = nh->subscribe<geometry_msgs::PoseStamped>("/airsim_node/drone_1/debug/pose_gt", 1, std::bind(&BasicDev::pose_cb, this, std::placeholders::_1));//状态真值，用于赛道一
     gps_suber = nh->subscribe<geometry_msgs::PoseStamped>("/airsim_node/drone_1/gps", 1, std::bind(&BasicDev::gps_cb, this, std::placeholders::_1));//状态真值，用于赛道一
     // imu_suber = nh->subscribe<sensor_msgs::Imu>("airsim_node/drone_1/imu/imu", 1, std::bind(&BasicDev::imu_cb, this, std::placeholders::_1));//imu数据
-    lidar_suber = nh->subscribe<sensor_msgs::PointCloud2>("airsim_node/drone_1/lidar", 1, std::bind(&BasicDev::lidar_cb, this, std::placeholders::_1));//imu数据
+    lidar_suber = nh->subscribe<sensor_msgs::PointCloud2>("airsim_node/drone_1/lidar", 1, std::bind(&BasicDev::lidar_cb, this, std::placeholders::_1));
     // front_left_view_suber = it->subscribe("airsim_node/drone_1/front_left/Scene", 1, std::bind(&BasicDev::front_left_view_cb, this,  std::placeholders::_1));
     // front_right_view_suber = it->subscribe("airsim_node/drone_1/front_right/Scene", 1, std::bind(&BasicDev::front_right_view_cb, this,  std::placeholders::_1));
     //通过这两个服务可以调用模拟器中的无人机起飞和降落命令
@@ -44,6 +44,14 @@ BasicDev::BasicDev(ros::NodeHandle *nh)
 
     lidar_nwu_publisher = nh->advertise<sensor_msgs::PointCloud2>("airsim_node/drone_1/lidar_nwu", 1);
 
+    // 发布地图系从ned到nwu的变换
+    static_tf_timer = nh->createTimer(ros::Duration(0.1), std::bind(&BasicDev::static_tf_broadcast, this));
+
+    // 订阅并发布world系下的终点坐标
+    end_goal_suber = nh->subscribe<geometry_msgs::PoseStamped>(
+        "/airsim_node/end_goal", 1, std::bind(&BasicDev::goal_cb, this, std::placeholders::_1));//imu数据
+    goal_nwu_publisher = nh->advertise<geometry_msgs::PoseStamped>("airsim_node/goal", 1);
+
     // takeoff_client.call(takeoff); //起飞
     // land_client.call(land); //降落
     // reset_client.call(reset); //重置
@@ -53,6 +61,7 @@ BasicDev::BasicDev(ros::NodeHandle *nh)
 
 BasicDev::~BasicDev()
 {
+    static_tf_timer.stop();
 }
 
 void BasicDev::pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg)
@@ -111,6 +120,27 @@ void BasicDev::lidar_cb(const sensor_msgs::PointCloud2::ConstPtr& msg)
     msg_nwu.header.frame_id = "lidar_nwu";
 
     lidar_nwu_publisher.publish(msg_nwu);
+}
+
+void BasicDev::static_tf_broadcast()
+{
+    geometry_msgs::TransformStamped static_transformStamped;
+
+    static_transformStamped.header.stamp = ros::Time::now();
+    static_transformStamped.header.frame_id = "map_ned";
+    static_transformStamped.child_frame_id = "map";
+
+    static_transformStamped.transform.translation.x = 0.0;
+    static_transformStamped.transform.translation.y = 0.0;
+    static_transformStamped.transform.translation.z = 0.0;
+    tf2::Quaternion quat;
+    quat.setRPY(M_PI, 0, 0);
+    static_transformStamped.transform.rotation.x = quat.x();
+    static_transformStamped.transform.rotation.y = quat.y();
+    static_transformStamped.transform.rotation.z = quat.z();
+    static_transformStamped.transform.rotation.w = quat.w();
+
+    static_broadcaster_.sendTransform(static_transformStamped);
 }
 
 #endif

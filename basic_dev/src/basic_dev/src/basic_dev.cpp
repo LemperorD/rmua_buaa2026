@@ -45,12 +45,12 @@ BasicDev::BasicDev(ros::NodeHandle *nh)
     lidar_nwu_publisher = nh->advertise<sensor_msgs::PointCloud2>("airsim_node/drone_1/lidar_nwu", 1);
 
     // 发布地图系从ned到nwu的变换
-    static_tf_timer = nh->createTimer(ros::Duration(0.1), std::bind(&BasicDev::static_tf_broadcast, this));
+    static_tf_timer = nh->createTimer(ros::Duration(0.05), std::bind(&BasicDev::static_tf_broadcast, this));
 
     // 订阅并发布world系下的终点坐标
-    end_goal_suber = nh->subscribe<geometry_msgs::PoseStamped>(
-        "/airsim_node/end_goal", 1, std::bind(&BasicDev::goal_cb, this, std::placeholders::_1));//imu数据
-    goal_nwu_publisher = nh->advertise<geometry_msgs::PoseStamped>("airsim_node/goal", 1);
+    // end_goal_suber = nh->subscribe<geometry_msgs::PoseStamped>(
+    //     "/airsim_node/end_goal", 1, std::bind(&BasicDev::goal_cb, this, std::placeholders::_1));//imu数据
+    // goal_nwu_publisher = nh->advertise<geometry_msgs::PoseStamped>("airsim_node/goal", 1);
 
     // takeoff_client.call(takeoff); //起飞
     // land_client.call(land); //降落
@@ -124,23 +124,92 @@ void BasicDev::lidar_cb(const sensor_msgs::PointCloud2::ConstPtr& msg)
 
 void BasicDev::static_tf_broadcast()
 {
-    geometry_msgs::TransformStamped static_transformStamped;
+    geometry_msgs::TransformStamped tf_msg;
+    tf_msg.header.stamp = ros::Time::now();
 
-    static_transformStamped.header.stamp = ros::Time::now();
-    static_transformStamped.header.frame_id = "map_ned";
-    static_transformStamped.child_frame_id = "map";
+    // ========================
+    // 1. map_ned -> map
+    // ========================
+    tf_msg.header.frame_id = "map_ned";
+    tf_msg.child_frame_id = "map";
+    tf_msg.transform.translation.x = 0.0;
+    tf_msg.transform.translation.y = 0.0;
+    tf_msg.transform.translation.z = 0.0;
 
-    static_transformStamped.transform.translation.x = 0.0;
-    static_transformStamped.transform.translation.y = 0.0;
-    static_transformStamped.transform.translation.z = 0.0;
-    tf2::Quaternion quat;
-    quat.setRPY(M_PI, 0, 0);
-    static_transformStamped.transform.rotation.x = quat.x();
-    static_transformStamped.transform.rotation.y = quat.y();
-    static_transformStamped.transform.rotation.z = quat.z();
-    static_transformStamped.transform.rotation.w = quat.w();
+    tf2::Quaternion quat1;
+    quat1.setRPY(M_PI, 0, 0);
+    tf_msg.transform.rotation.x = quat1.x();
+    tf_msg.transform.rotation.y = quat1.y();
+    tf_msg.transform.rotation.z = quat1.z();
+    tf_msg.transform.rotation.w = quat1.w();
 
-    static_broadcaster_.sendTransform(static_transformStamped);
+    static_broadcaster_.sendTransform(tf_msg);
+
+    // ========================
+    // 2. body -> lidar_nwu
+    // ========================
+    tf_msg.header.frame_id = "body";
+    tf_msg.child_frame_id = "lidar_nwu";
+    tf_msg.transform.translation.x = 0.0;
+    tf_msg.transform.translation.y = 0.0;
+    tf_msg.transform.translation.z = 0.05;
+
+    tf2::Quaternion quat2;
+    quat2.setRPY(0, 0, 0);
+    tf_msg.transform.rotation.x = quat2.x();
+    tf_msg.transform.rotation.y = quat2.y();
+    tf_msg.transform.rotation.z = quat2.z();
+    tf_msg.transform.rotation.w = quat2.w();
+
+    static_broadcaster_.sendTransform(tf_msg);
+
+    // ========================
+    // 3. body -> front_left_optical
+    // ========================
+    tf_msg.header.frame_id = "body";
+    tf_msg.child_frame_id = "front_left_optical";
+    tf_msg.transform.translation.x = 0.175;
+    tf_msg.transform.translation.y = 0.15;
+    tf_msg.transform.translation.z = 0.0;
+
+    tf2::Quaternion quat3;
+    quat3.setRPY(0, 0, 0);
+    tf_msg.transform.rotation.x = quat3.x();
+    tf_msg.transform.rotation.y = quat3.y();
+    tf_msg.transform.rotation.z = quat3.z();
+    tf_msg.transform.rotation.w = quat3.w();
+
+    static_broadcaster_.sendTransform(tf_msg);
+
+    // ========================
+    // 4. body -> front_right_optical
+    // ========================
+    tf_msg.child_frame_id = "front_right_optical";
+    tf_msg.transform.translation.x = 0.175;
+    tf_msg.transform.translation.y = -0.15;
+    tf_msg.transform.translation.z = 0.0;
+
+    static_broadcaster_.sendTransform(tf_msg);
+
+    // ========================
+    // 5. body -> back_left_optical
+    // ========================
+    tf_msg.child_frame_id = "back_left_optical";
+    tf_msg.transform.translation.x = -0.175;
+    tf_msg.transform.translation.y = 0.15;
+    tf_msg.transform.translation.z = 0.05;
+
+    static_broadcaster_.sendTransform(tf_msg);
+
+    // ========================
+    // 6. body -> back_right_optical
+    // ========================
+    tf_msg.child_frame_id = "back_right_optical";
+    tf_msg.transform.translation.x = -0.175;
+    tf_msg.transform.translation.y = -0.15;
+    tf_msg.transform.translation.z = 0.05;
+
+    static_broadcaster_.sendTransform(tf_msg);
 }
 
 #endif
